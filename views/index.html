@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset="utf-8">
+		<title>Pulse</title>
+		<link rel="stylesheet" type="text/css" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	</head>
+
+	<body>
+		<!--
+			//random variable
+			{{message}}
+
+			//if statement
+			{% if message != '' %}
+
+			{% endif %}
+
+			//iterating over db query
+			{% for user in user_list %}
+				<li>{{user.first_name}} {{user.last_name}} : {{user.email}}</li>
+			{% endfor %}
+		-->
+
+		<div class="alert alert-success" role="alert"></div>
+		<span>USERNAME: </span>
+		  	<div class="form-group">
+		    	<input id="username" type="text" class="form-control" placeholder="username">
+		  	</div>
+		  	<button id="submit" type="submit" class="btn btn-default">Submit</button>
+		
+		<br>
+		<div id="room"></div>
+		<br>
+		<button onclick="joinRoom('default'); document.querySelector('.alert').innerHTML ='default room'" class="btn btn-primary">Default Room</button>
+		<button onclick="joinRoom('zombies'); document.querySelector('.alert').innerHTML ='zombies room'" class="btn btn-primary">Zombies Room</button>
+
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+		<script src="/socket.io/socket.io.js"></script>
+
+		<script type="text/javascript">
+			var socket = io.connect();
+
+			socket.on('ping', function(data) {
+				console.log('PONG: ' + data);
+				start(data);
+			});
+
+			socket.on('show current room', function(data) {
+				console.log('you are part of room: '+ data.room)
+			})
+			
+		</script>
+
+		<script src="/reload/reload.js"></script>
+
+		<script type="text/javascript">
+			function joinRoom(room_id) {
+				socket.emit('join room', {'room': room_id});
+				socket.emit('show room', {})
+			};
+
+			function getLocation() {
+			    if (navigator.geolocation) {
+			        navigator.geolocation.getCurrentPosition(printPosition);
+			    } else {
+			        console.log("Geolocation is not supported by this browser.");
+			    }
+			    return false;
+			}
+
+			function getCookie(cname) {
+			    var name = cname + "=";
+			    var ca = document.cookie.split(';');
+			    for(var i=0; i<ca.length; i++) {
+			        var c = ca[i].trim();
+			        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+			    }
+			    return "";
+			}
+
+			function printPosition(position) {
+			    console.log("Latitude: " + position.coords.latitude + " Longitude: " + position.coords.longitude);
+			    socket.emit('update location', {'lon': position.coords.longitude, 'lat': position.coords.latitude})
+			}
+
+			function start(data) {
+				//set the banner
+				document.querySelector('.alert').innerHTML ='default room';
+				//getLocation()
+				if (!getCookie('username')) {
+					//navigator.geolocation.getCurrentPosition(printPosition);
+					console.log('NEW USER!!!!!! please pick a username');
+					navigator.geolocation.getCurrentPosition(success);
+					document.cookie='username='+data.id;
+				}
+			}
+
+			//anthony jeselnik
+			function success(pos) {
+				socket.emit('new user', {'username': getCookie('username'), 'lon': pos.coords.longitude, 'lat': pos.coords.latitude})
+				//var crd = pos.coords;
+				//console.log(crd.longitude)
+			}
+
+			setInterval(function() {
+		        //socket.emit('test')
+		    }, 3000);
+			
+
+			$('#submit').click(function() {
+				console.log('your username: ' + $('#username').val())
+			})
+		</script>
+
+	</body>
+	</body>
+</html>
