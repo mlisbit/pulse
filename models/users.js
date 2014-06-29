@@ -4,9 +4,7 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 
 var UserSchema = new Schema({
-	first_name: { type: String, required: true},
-  	last_name: { type: String, required: true},
-  	email: { type: String, required: true},
+	username: { type: String, required: true},
   	loc: { type: { type: String }, coordinates: [ ] }
 });
 
@@ -20,18 +18,28 @@ UserSchema.statics.newUser = function (username, location, fn) {
     console.log('IT HAS BEEN SAVED!');
 
 	instance.save(function (err) {
-		/*
 		if (err) {
-			return fn(new Error('Error'));
+			console.log('error in saving user.' + err);
 		} else {
-
+			console.log('user saved')
 		}
-		if (typeof(fn) == "function") {
-		    fn(err, instance);
-		};
-		*/
 	 }); //save
 }; //newuser
+
+UserSchema.statics.changeUsername = function (oldname, newname, fn) {
+	User.findOne({username : oldname}, function(err, user) {
+		user.username = newname;
+	    user.save(function (err) {
+	        if(err) {
+	            console.error('ERROR!');
+	        } else {
+	        	console.log('user has been updated')
+	        	fn();
+	        }
+	    });
+	});
+}
+
 
 UserSchema.statics.list = function (fn) {
     User.find({}, function (err, users) {

@@ -62,6 +62,13 @@ io.sockets.on('connection', function(socket) {
     
   })
 
+  socket.on('change username', function(data) {
+
+    User.changeUsername(data.old, data.username, function() {
+      //socket.emit('refresh users', {});
+    });
+  });
+
   socket.on('join room', function(data) {
     console.log('joining room: ' + data.room);
     socket.current_room = data.room;

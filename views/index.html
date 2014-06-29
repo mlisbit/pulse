@@ -17,23 +17,42 @@
 			{% endif %}
 
 			//iterating over db query
-			{% for user in user_list %}
-				<li>{{user.first_name}} {{user.last_name}} : {{user.email}}</li>
-			{% endfor %}
+			
 		-->
 
 		<div class="alert alert-success" role="alert"></div>
-		<span>USERNAME: </span>
-		  	<div class="form-group">
+		<div class="row">
+			<div class="col-md-4">
+				<h3>Your Info</h3>
+				<span>USERNAME: </span>
+		  		<div class="form-group">
 		    	<input id="username" type="text" class="form-control" placeholder="username">
-		  	</div>
-		  	<button id="submit" type="submit" class="btn btn-default">Submit</button>
+		  		</div>
+		  		<button id="submit" type="submit" class="btn btn-default">Submit</button>
+				<br>
+			</div>
+
+			<div class="col-md-4">
+				<h3>Open Rooms</h3>
+				<button onclick="joinRoom('default'); document.querySelector('.alert').innerHTML ='default room'" class="btn btn-primary">Default Room</button>
+				<button onclick="joinRoom('zombies'); document.querySelector('.alert').innerHTML ='zombies room'" class="btn btn-primary">Zombies Room</button>
+			</div>
+
+			<div class="col-md-4">
+				<h3>Current Users</h3>
+				<ul class="list">
+					{% for user in user_list %}
+						<li>{{user.username}}</li>
+					{% endfor %}
+				</ul>
+			</div>
+
+		</div> <!-- row -->
 		
+		<!-- <div id="room"></div> -->
 		<br>
-		<div id="room"></div>
-		<br>
-		<button onclick="joinRoom('default'); document.querySelector('.alert').innerHTML ='default room'" class="btn btn-primary">Default Room</button>
-		<button onclick="joinRoom('zombies'); document.querySelector('.alert').innerHTML ='zombies room'" class="btn btn-primary">Zombies Room</button>
+
+		
 
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 		<script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
@@ -50,6 +69,10 @@
 
 			socket.on('show current room', function(data) {
 				console.log('you are part of room: '+ data.room)
+			})
+
+			socket.on('refresh users', function(data) {
+				listUsers()
 			})
 			
 		</script>
@@ -105,6 +128,12 @@
 				//console.log(crd.longitude)
 			}
 
+			function listUsers(user_list) {
+				console.log('users should have been updated');
+				$('.list').empty();
+
+			}
+
 			setInterval(function() {
 		        //socket.emit('test')
 		    }, 3000);
@@ -112,9 +141,11 @@
 
 			$('#submit').click(function() {
 				console.log('your username: ' + $('#username').val())
+				socket.emit('change username', {'old': getCookie('username'), 'username': $('#username').val()})
+				document.cookie='username='+$('#username').val();
 			})
 		</script>
 
 	</body>
 	</body>
-</html>
+</html> 
