@@ -52,6 +52,11 @@ app.post('/delete/:email',  user.delete_post);
 io.sockets.on('connection', function(socket) {
   socket.current_room = 'default'  
   socket.emit('ping', {'id': socket.id})
+  User.list(function(users) {
+    socket.emit('refresh users', {'users': users});
+    socket.broadcast.emit('refresh users', {'users': users});
+  });
+
   console.log('connected established with client id of: ' + socket.id + ' part of room: ' + socket.current_room);
 
   socket.on('show room', function() {
@@ -63,9 +68,12 @@ io.sockets.on('connection', function(socket) {
   })
 
   socket.on('change username', function(data) {
-
+    console.log('current user' + data.old)
     User.changeUsername(data.old, data.username, function() {
-      //socket.emit('refresh users', {});
+      User.list(function(users) {
+         socket.emit('refresh users', {'users': users});
+         socket.broadcast.emit('refresh users', {'users': users});
+      });
     });
   });
 

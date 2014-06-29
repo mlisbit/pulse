@@ -69,11 +69,12 @@
 
 			socket.on('show current room', function(data) {
 				console.log('you are part of room: '+ data.room)
-			})
+			});
 
 			socket.on('refresh users', function(data) {
-				listUsers()
-			})
+				console.log('Here: ' + data.users)
+				listUsers(data.users)
+			});
 			
 		</script>
 
@@ -129,8 +130,11 @@
 			}
 
 			function listUsers(user_list) {
-				console.log('users should have been updated');
+				console.log('users should have been updated', user_list);
 				$('.list').empty();
+				$.each(user_list, function(key, value) {
+					$('.list').append('<li>'+value.username+'</li>')
+				})
 
 			}
 
@@ -140,9 +144,11 @@
 			
 
 			$('#submit').click(function() {
-				console.log('your username: ' + $('#username').val())
+				console.log('your username: ' + $('#username').val());
+
 				socket.emit('change username', {'old': getCookie('username'), 'username': $('#username').val()})
 				document.cookie='username='+$('#username').val();
+
 			})
 		</script>
 
